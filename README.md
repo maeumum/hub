@@ -43,4 +43,4 @@ npm run build  # 프로덕션 빌드
 
 ## 더 자세한 내용
 
-전체 기획서(문제 정의, 유사 서비스 분석, Use Case, 사용자 시나리오, 법적 검토 등)는 [Wiki](../../wiki)에서 확인할 수 있습니다.
+전체 기획서(문제 정의, 유사 서비스 분석, Use Case, 사용자 시나리오, 법적 검토 등)는 [프로젝트 기획서](https://github.com/maeumum/hub/wiki/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EA%B8%B0%ED%9A%8D%EC%84%9C)에서 확인할 수 있습니다.
