@@ -6,24 +6,24 @@
 
 | # | 레이어 | 작업 | 의존 | 상태 |
 |---|---|---|---|---|
-| 0 | 환경 | Supabase 프로젝트 생성 + DATABASE_URL 발급 | — | [ ] |
-| 1 | BE·DB | schema.prisma PostgreSQL 전환 + prisma:migrate | 0 | [ ] |
-| 2 | BE | POST /api/progress/:taskId/toggle curl 검증 (Supabase 대상) | 1 | [ ] |
-| 3 | FE | mock 기반 비동기 토글 UI — 낙관적 업데이트 + isLoading | — | [ ] |
-| 4 | FE·BE | mock → 실제 fetch 교체, 쓰기 경로 연결 | 2, 3 | [ ] |
-| 5 | FE·BE | GET /api/progress 연결, 새로고침 후 상태 복원 | 4 | [ ] |
-| 6 | 통합 | 전체 사이클 검증 + 기능 검증 Agent 작성 | 5 | [ ] |
+| 1 | 환경 | Supabase 프로젝트 생성 + DATABASE_URL 발급 | — | [ ] |
+| 2 | BE·DB | schema.prisma PostgreSQL 전환 + prisma:migrate | 1 | [ ] |
+| 3 | BE | POST /api/progress/:taskId/toggle curl 검증 (Supabase 대상) | 2 | [ ] |
+| 4 | FE | mock 기반 비동기 토글 UI — 낙관적 업데이트 + isLoading | — | [ ] |
+| 5 | FE·BE | mock → 실제 fetch 교체, 쓰기 경로 연결 | 3, 4 | [ ] |
+| 6 | FE·BE | GET /api/progress 연결, 새로고침 후 상태 복원 | 5 | [ ] |
+| 7 | 통합 | 전체 사이클 검증 + 기능 검증 Agent 작성 | 6 | [ ] |
 
 ## 진행 순서
 
 ```
-이슈 0 (Supabase 준비)
-    └─→ 이슈 1 (DB 전환) → 이슈 2 (BE 검증) ─┐
-이슈 3 (FE mock) ──────────────────────────────┤
-                                               └─→ 이슈 4 → 이슈 5 → 이슈 6
+이슈 1 (Supabase 준비)
+    └─→ 이슈 2 (DB 전환) → 이슈 3 (BE 검증) ─┐
+이슈 4 (FE mock) ──────────────────────────────┤
+                                               └─→ 이슈 5 → 이슈 6 → 이슈 7
 ```
 
-이슈 0~1은 순차, 이슈 2와 3은 병렬 가능, 이슈 4부터 순차.
+이슈 1~2는 순차, 이슈 3과 4는 병렬 가능, 이슈 5부터 순차.
 
 ## 스코프 밖 (이번 주 안 함)
 
@@ -36,7 +36,7 @@
 
 ## 이슈 상세
 
-### #0 `[환경]` Supabase 프로젝트 생성 + DATABASE_URL 발급
+### #1 `[환경]` Supabase 프로젝트 생성 + DATABASE_URL 발급
 
 **작업자:** 사람 (브라우저 직접)
 
@@ -54,9 +54,9 @@
 
 ---
 
-### #1 `[BE·DB]` schema.prisma PostgreSQL 전환 + 마이그레이션
+### #2 `[BE·DB]` schema.prisma PostgreSQL 전환 + 마이그레이션
 
-**의존:** #0  
+**의존:** #1  
 **변경 파일:** `server/prisma/schema.prisma`
 
 **진행 순서**
@@ -83,9 +83,9 @@
 
 ---
 
-### #2 `[BE]` BE API curl 검증 (Supabase 대상)
+### #3 `[BE]` BE API curl 검증 (Supabase 대상)
 
-**의존:** #1  
+**의존:** #2  
 **코드 변경 없음 — 검증만**
 
 **진행 순서**
@@ -113,9 +113,9 @@ curl -b cookies.txt http://localhost:4000/api/progress
 
 ---
 
-### #3 `[FE]` mock 기반 비동기 토글 UI — 낙관적 업데이트 + isLoading
+### #4 `[FE]` mock 기반 비동기 토글 UI — 낙관적 업데이트 + isLoading
 
-**의존:** 없음 (#2와 병렬 가능)  
+**의존:** 없음 (#3과 병렬 가능)  
 **변경 파일:** `src/App.tsx`, `src/components/TaskCard.tsx`, `src/components/TaskCard.css`
 
 **진행 순서**
@@ -127,7 +127,7 @@ curl -b cookies.txt http://localhost:4000/api/progress
      setProgress(prev => ({ ...prev, [taskId]: !prev[taskId] })) // 낙관적 업데이트
      setLoadingTaskId(taskId)
      try {
-       await new Promise(r => setTimeout(r, 300)) // mock — 이슈 4에서 fetch로 교체
+       await new Promise(r => setTimeout(r, 300)) // mock — 이슈 5에서 fetch로 교체
      } catch {
        setProgress(prev => ({ ...prev, [taskId]: !prev[taskId] })) // 롤백
      } finally {
@@ -149,9 +149,9 @@ curl -b cookies.txt http://localhost:4000/api/progress
 
 ---
 
-### #4 `[FE·BE]` mock → 실제 fetch 교체, 쓰기 경로 연결
+### #5 `[FE·BE]` mock → 실제 fetch 교체, 쓰기 경로 연결
 
-**의존:** #2, #3  
+**의존:** #3, #4  
 **변경 파일:** `src/App.tsx`
 
 **진행 순서**
@@ -175,9 +175,9 @@ curl -b cookies.txt http://localhost:4000/api/progress
 
 ---
 
-### #5 `[FE·BE]` GET /api/progress 연결, 새로고침 후 상태 복원
+### #6 `[FE·BE]` GET /api/progress 연결, 새로고침 후 상태 복원
 
-**의존:** #4  
+**의존:** #5  
 **변경 파일:** `src/App.tsx`
 
 **진행 순서**
@@ -203,9 +203,9 @@ curl -b cookies.txt http://localhost:4000/api/progress
 
 ---
 
-### #6 `[통합]` 전체 사이클 검증 + 기능 검증 Agent 작성
+### #7 `[통합]` 전체 사이클 검증 + 기능 검증 Agent 작성
 
-**의존:** #5  
+**의존:** #6  
 **코드 변경 없음 — 검증 + 문서화**
 
 **진행 순서**
