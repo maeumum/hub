@@ -26,7 +26,14 @@ function App() {
     setProgress((prev) => ({ ...prev, [taskId]: !prev[taskId] }))
     setLoadingTaskId(taskId)
     try {
-      await new Promise((r) => setTimeout(r, 300)) // mock — 이슈 #5에서 실제 fetch로 교체
+      const res = await fetch(
+        `http://localhost:4000/api/progress/${taskId}/toggle`,
+        { method: 'POST', credentials: 'include' }
+      )
+      if (!res.ok) throw new Error('toggle failed')
+      const data = await res.json()
+      // 서버 응답값으로 낙관적 업데이트 보정
+      setProgress((prev) => ({ ...prev, [taskId]: data.checked }))
     } catch {
       // 실패 시 낙관적 업데이트 롤백
       setProgress((prev) => ({ ...prev, [taskId]: !prev[taskId] }))
