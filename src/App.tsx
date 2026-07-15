@@ -14,14 +14,25 @@ function App() {
   // progress: { [taskId]: checked } 형태. profile과 분리된 이유는
   // "조건 다시 입력" 시 체크 상태를 유지하기 위함
   const [progress, setProgress] = useLocalStorage<Record<string, boolean>>('progress', {})
+  // 현재 토글 요청 중인 taskId. null이면 대기 중인 요청 없음
+  const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null)
   // 대시보드에서 "조건 다시 입력" 버튼을 눌렀을 때 온보딩 폼으로 되돌아가는 플래그
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   // 첫 방문자에게만 랜딩 페이지를 보여주기 위한 플래그
   const [showLanding, setShowLanding] = useState(true)
 
-  // 체크박스 클릭 시 해당 taskId의 checked 값을 반전
-  function handleToggle(taskId: string) {
+  async function handleToggle(taskId: string) {
+    // 낙관적 업데이트: 서버 응답 전에 UI를 먼저 반영
     setProgress((prev) => ({ ...prev, [taskId]: !prev[taskId] }))
+    setLoadingTaskId(taskId)
+    try {
+      await new Promise((r) => setTimeout(r, 300)) // mock — 이슈 #5에서 실제 fetch로 교체
+    } catch {
+      // 실패 시 낙관적 업데이트 롤백
+      setProgress((prev) => ({ ...prev, [taskId]: !prev[taskId] }))
+    } finally {
+      setLoadingTaskId(null)
+    }
   }
 
   // 온보딩 완료 또는 조건 재입력 완료 시 호출
@@ -49,6 +60,7 @@ function App() {
     <Dashboard
       profile={profile}
       progress={progress}
+      loadingTaskId={loadingTaskId}
       onToggle={handleToggle}
       onEditProfile={() => setIsEditingProfile(true)}
       onResetProgress={handleResetProgress}
