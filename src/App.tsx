@@ -12,6 +12,8 @@ function App() {
   const [profile, setProfile] = useState<Profile | null>(null)
   // progress 초기값을 빈 객체로 시작하고, 마운트 시 서버에서 불러온다
   const [progress, setProgress] = useState<Record<string, boolean>>({})
+  // 서버 기반 task 필터. null이면 클라이언트 condition 함수로 fallback
+  const [taskIds, setTaskIds] = useState<string[] | null>(null)
   // 현재 토글 요청 중인 taskId. null이면 대기 중인 요청 없음
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null)
   // 대시보드에서 "조건 다시 입력" 버튼을 눌렀을 때 온보딩 폼으로 되돌아가는 플래그
@@ -19,7 +21,7 @@ function App() {
   // 첫 방문자에게만 랜딩 페이지를 보여주기 위한 플래그
   const [showLanding, setShowLanding] = useState(true)
 
-  // 마운트 시 서버에서 profile + progress 동시 복원
+  // 마운트 시 서버에서 profile + progress + tasks 동시 복원
   useEffect(() => {
     fetch('http://localhost:4000/api/profile', { credentials: 'include' })
       .then((r) => r.json())
@@ -29,6 +31,11 @@ function App() {
     fetch('http://localhost:4000/api/progress', { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => setProgress(data))
+      .catch(() => {})
+
+    fetch('http://localhost:4000/api/tasks', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => { if (data?.taskIds) setTaskIds(data.taskIds) })
       .catch(() => {})
   }, [])
 
@@ -63,6 +70,11 @@ function App() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProfile),
     }).catch(() => {})
+    // 프로필 저장 후 서버 기반 task 목록 갱신
+    fetch('http://localhost:4000/api/tasks', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => { if (data?.taskIds) setTaskIds(data.taskIds) })
+      .catch(() => {})
   }
 
   async function handleResetProgress() {
@@ -88,6 +100,7 @@ function App() {
     <Dashboard
       profile={profile}
       progress={progress}
+      taskIds={taskIds}
       loadingTaskId={loadingTaskId}
       onToggle={handleToggle}
       onEditProfile={() => setIsEditingProfile(true)}
