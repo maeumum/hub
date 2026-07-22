@@ -50,9 +50,15 @@ function App() {
   }
 
   // 온보딩 완료 또는 조건 재입력 완료 시 호출
-  function handleComplete(newProfile: Profile) {
+  async function handleComplete(newProfile: Profile) {
     setProfile(newProfile)
     setIsEditingProfile(false)
+    await fetch('http://localhost:4000/api/profile', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProfile),
+    }).catch(() => {})
   }
 
   async function handleResetProgress() {
