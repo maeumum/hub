@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useLocalStorage } from './hooks/useLocalStorage'
 import type { Profile } from './types'
 import Landing from './components/Landing'
 import OnboardingForm from './components/OnboardingForm'
@@ -10,7 +9,7 @@ import Dashboard from './components/Dashboard'
 // 재방문 시: localStorage에 profile이 있으면 Dashboard로 바로 진입
 function App() {
   // profile: 온보딩 5문항 답변. null이면 온보딩 미완료
-  const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   // progress 초기값을 빈 객체로 시작하고, 마운트 시 서버에서 불러온다
   const [progress, setProgress] = useState<Record<string, boolean>>({})
   // 현재 토글 요청 중인 taskId. null이면 대기 중인 요청 없음
@@ -20,12 +19,17 @@ function App() {
   // 첫 방문자에게만 랜딩 페이지를 보여주기 위한 플래그
   const [showLanding, setShowLanding] = useState(true)
 
-  // 마운트 시 서버에서 progress 초기값 fetch — 새로고침 후 체크 상태 복원
+  // 마운트 시 서버에서 profile + progress 동시 복원
   useEffect(() => {
+    fetch('http://localhost:4000/api/profile', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((data) => { if (data?.industry) setProfile(data) })
+      .catch(() => {})
+
     fetch('http://localhost:4000/api/progress', { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => setProgress(data))
-      .catch(() => {}) // 서버 오류 시 빈 상태 유지
+      .catch(() => {})
   }, [])
 
   async function handleToggle(taskId: string) {
