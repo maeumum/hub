@@ -47,11 +47,14 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
       selected === 'all' ? applicableTasks : applicableTasks.filter((task) => task.group === selected)
 
     return [...filtered].sort((a, b) => {
+      const checkedA = progress[a.id]?.checked ? 1 : 0
+      const checkedB = progress[b.id]?.checked ? 1 : 0
+      if (checkedA !== checkedB) return checkedA - checkedB
       const dueA = a.dueDate?.(profile)?.getTime() ?? Infinity
       const dueB = b.dueDate?.(profile)?.getTime() ?? Infinity
       return dueA - dueB
     })
-  }, [applicableTasks, selected, profile])
+  }, [applicableTasks, selected, profile, progress])
 
   const completedCount = applicableTasks.filter((task) => progress[task.id]?.checked).length
   const progressPct = applicableTasks.length
