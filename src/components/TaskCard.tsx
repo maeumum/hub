@@ -5,6 +5,7 @@ interface TaskCardProps {
   task: Task
   profile: Profile
   checked: boolean
+  completedAt?: string | null
   isLoading?: boolean
   onToggle: (taskId: string) => void
 }
@@ -25,7 +26,12 @@ function formatDday(diffDays: number): string {
   return `D+${Math.abs(diffDays)} 지남`
 }
 
-function TaskCard({ task, profile, checked, isLoading = false, onToggle }: TaskCardProps) {
+function formatCompletedAt(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 처리완료`
+}
+
+function TaskCard({ task, profile, checked, completedAt, isLoading = false, onToggle }: TaskCardProps) {
   // dueDate 함수가 없는 항목(예: 교육 정보)은 배지를 표시하지 않음
   const dueDate = task.dueDate?.(profile)
   const diffDays = dueDate ? daysUntil(dueDate) : null
@@ -60,6 +66,9 @@ function TaskCard({ task, profile, checked, isLoading = false, onToggle }: TaskC
           {task.sourceLabel}에서 확인하기
         </a>
         <p className="task-card__updated">최종 확인일: {task.lastCheckedDate}</p>
+        {checked && completedAt && (
+          <p className="task-card__completed-at">{formatCompletedAt(completedAt)}</p>
+        )}
       </div>
     </article>
   )

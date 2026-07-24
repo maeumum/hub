@@ -6,7 +6,7 @@ import './Dashboard.css'
 
 interface DashboardProps {
   profile: Profile
-  progress: Record<string, boolean>
+  progress: Record<string, { checked: boolean; completedAt: string | null }>
   taskIds: string[] | null
   loadingTaskId: string | null
   isLoading: boolean
@@ -53,7 +53,7 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
     })
   }, [applicableTasks, selected, profile])
 
-  const completedCount = applicableTasks.filter((task) => progress[task.id]).length
+  const completedCount = applicableTasks.filter((task) => progress[task.id]?.checked).length
   const progressPct = applicableTasks.length
     ? Math.round((completedCount / applicableTasks.length) * 100)
     : 0
@@ -129,7 +129,8 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
                   key={task.id}
                   task={task}
                   profile={profile}
-                  checked={Boolean(progress[task.id])}
+                  checked={Boolean(progress[task.id]?.checked)}
+                  completedAt={progress[task.id]?.completedAt ?? null}
                   isLoading={loadingTaskId === task.id}
                   onToggle={onToggle}
                 />
