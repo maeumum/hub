@@ -136,9 +136,19 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
             {region && REGIONAL_TAX_OFFICES[region] && (
               <div className="dashboard__tax-office-result">
                 <span>{REGIONAL_TAX_OFFICES[region].name}</span>
-                <a href={`tel:${REGIONAL_TAX_OFFICES[region].tel.replace(/-/g, '')}`}>
-                  {REGIONAL_TAX_OFFICES[region].tel}
-                </a>
+                <div className="dashboard__tax-office-actions">
+                  <a
+                    href={`https://map.naver.com/v5/search/${encodeURIComponent(REGIONAL_TAX_OFFICES[region].name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="dashboard__tax-office-map"
+                  >
+                    지도 보기
+                  </a>
+                  <a href={`tel:${REGIONAL_TAX_OFFICES[region].tel.replace(/-/g, '')}`}>
+                    {REGIONAL_TAX_OFFICES[region].tel}
+                  </a>
+                </div>
               </div>
             )}
           </div>
