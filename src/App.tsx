@@ -4,6 +4,8 @@ import Landing from './components/Landing'
 import OnboardingForm from './components/OnboardingForm'
 import Dashboard from './components/Dashboard'
 
+const API = import.meta.env.VITE_API_URL as string
+
 // 화면 전환을 라우터 없이 상태만으로 관리한다.
 // 흐름: Landing → OnboardingForm → Dashboard
 // 재방문 시: localStorage에 profile이 있으면 Dashboard로 바로 진입
@@ -28,13 +30,13 @@ function App() {
   // allSettled: 하나가 실패해도 나머지 fetch는 계속 진행
   useEffect(() => {
     Promise.allSettled([
-      fetch('http://localhost:4000/api/profile', { credentials: 'include' })
+      fetch(`${API}/api/profile`, { credentials: 'include' })
         .then((r) => r.json())
         .then((data) => { if (data?.industry) setProfile(data) }),
-      fetch('http://localhost:4000/api/progress', { credentials: 'include' })
+      fetch(`${API}/api/progress`, { credentials: 'include' })
         .then((r) => r.json())
         .then((data) => setProgress(data)),
-      fetch('http://localhost:4000/api/tasks', { credentials: 'include' })
+      fetch(`${API}/api/tasks`, { credentials: 'include' })
         .then((r) => r.json())
         .then((data) => { if (data?.taskIds) setTaskIds(data.taskIds) }),
     ]).then((results) => {
@@ -50,7 +52,7 @@ function App() {
     setLoadingTaskId(taskId)
     try {
       const res = await fetch(
-        `http://localhost:4000/api/progress/${taskId}/toggle`,
+        `${API}/api/progress/${taskId}/toggle`,
         { method: 'POST', credentials: 'include' }
       )
       if (!res.ok) throw new Error('toggle failed')
@@ -69,21 +71,21 @@ function App() {
   async function handleComplete(newProfile: Profile) {
     setProfile(newProfile)
     setIsEditingProfile(false)
-    await fetch('http://localhost:4000/api/profile', {
+    await fetch(`${API}/api/profile`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProfile),
     }).catch(() => {})
     // 프로필 저장 후 서버 기반 task 목록 갱신
-    fetch('http://localhost:4000/api/tasks', { credentials: 'include' })
+    fetch(`${API}/api/tasks`, { credentials: 'include' })
       .then((r) => r.json())
       .then((data) => { if (data?.taskIds) setTaskIds(data.taskIds) })
       .catch(() => {})
   }
 
   async function handleResetProgress() {
-    await fetch('http://localhost:4000/api/progress/reset', {
+    await fetch(`${API}/api/progress/reset`, {
       method: 'POST',
       credentials: 'include',
     }).catch(() => {})
