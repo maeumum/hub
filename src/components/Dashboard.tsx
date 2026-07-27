@@ -26,12 +26,13 @@ const REGIONAL_TAX_OFFICES: Record<string, { name: string; tel: string }> = {
 
 interface DashboardProps {
   profile: Profile
-  progress: Record<string, { checked: boolean; completedAt: string | null }>
+  progress: Record<string, { checked: boolean; completedAt: string | null; memo: string }>
   taskIds: string[] | null
   loadingTaskId: string | null
   isLoading: boolean
   apiError: boolean
   onToggle: (taskId: string) => void
+  onMemo: (taskId: string, memo: string) => void
   onEditProfile: () => void
   onResetProgress: () => void
 }
@@ -45,7 +46,7 @@ const filterOptions: { value: FilterOption; label: string }[] = [
   { value: 'subsidy', label: groupLabels.subsidy },
 ]
 
-function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiError, onToggle, onEditProfile, onResetProgress }: DashboardProps) {
+function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiError, onToggle, onMemo, onEditProfile, onResetProgress }: DashboardProps) {
   const [selected, setSelected] = useState<FilterOption | null>('all')
   const [region, setRegion] = useState('')
 
@@ -197,8 +198,10 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
                   profile={profile}
                   checked={Boolean(progress[task.id]?.checked)}
                   completedAt={progress[task.id]?.completedAt ?? null}
+                  memo={progress[task.id]?.memo ?? ''}
                   isLoading={loadingTaskId === task.id}
                   onToggle={onToggle}
+                  onMemo={onMemo}
                 />
               ))}
             </div>
