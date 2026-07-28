@@ -50,6 +50,9 @@ progressRouter.patch('/:taskId/memo', async (req, res) => {
 })
 
 progressRouter.post('/reset', async (req, res) => {
-  await prisma.taskProgress.deleteMany({ where: { sessionId: req.sessionId } })
+  await prisma.taskProgress.updateMany({
+    where: { sessionId: req.sessionId },
+    data: { checked: false },
+  })
   res.status(204).end()
 })

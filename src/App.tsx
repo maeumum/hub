@@ -94,7 +94,11 @@ function App() {
       method: 'POST',
       credentials: 'include',
     }).catch(() => {})
-    setProgress({})
+    setProgress((prev) =>
+      Object.fromEntries(
+        Object.entries(prev).map(([id, val]) => [id, { ...val, checked: false, completedAt: null }])
+      )
+    )
   }
 
   if (!profile && showLanding) {
