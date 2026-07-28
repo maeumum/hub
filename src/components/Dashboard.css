@@ -45,6 +45,16 @@
   background: var(--accent-dark-hover);
 }
 
+.dashboard__pill-btn--outline {
+  background: transparent;
+  color: var(--text-h);
+  border-color: var(--border-soft);
+}
+
+.dashboard__pill-btn--outline:hover {
+  background: var(--bg-muted);
+}
+
 .dashboard__body {
   flex: 1;
   display: flex;

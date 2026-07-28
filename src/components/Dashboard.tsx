@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Profile, TaskGroup } from '../types'
 import { groupLabels, tasks } from '../data/tasks'
 import TaskCard from './TaskCard'
@@ -49,6 +49,9 @@ const filterOptions: { value: FilterOption; label: string }[] = [
 function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiError, onToggle, onMemo, onEditProfile, onResetProgress }: DashboardProps) {
   const [selected, setSelected] = useState<FilterOption | null>('all')
   const [region, setRegion] = useState('')
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied'
+  )
 
   const applicableTasks = useMemo(
     () =>
@@ -78,6 +81,58 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
     })
   }, [applicableTasks, selected, profile, progress])
 
+  const urgentTasks = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return applicableTasks.filter((task) => {
+      if (progress[task.id]?.checked) return false
+      const due = task.dueDate?.(profile)
+      if (!due) return false
+      const dueDay = new Date(due)
+      dueDay.setHours(0, 0, 0, 0)
+      const diff = Math.round((dueDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      return diff >= 0 && diff <= 7
+    })
+  }, [applicableTasks, progress, profile])
+
+  function triggerNotifications() {
+    if (urgentTasks.length === 0) {
+      new Notification('소상공인 폐업 도우미', { body: '현재 마감 임박 항목이 없어요.' })
+      return
+    }
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (urgentTasks.length === 1) {
+      const task = urgentTasks[0]
+      const dueDay = new Date(task.dueDate!(profile))
+      dueDay.setHours(0, 0, 0, 0)
+      const diff = Math.round((dueDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      new Notification('소상공인 폐업 도우미', {
+        body: `${diff === 0 ? 'D-DAY' : `D-${diff}`} · ${task.title}`,
+      })
+    } else {
+      new Notification('소상공인 폐업 도우미', {
+        body: `마감 임박 항목 ${urgentTasks.length}개 — ${urgentTasks.map((t) => t.title).join(', ')}`,
+      })
+    }
+    localStorage.setItem('lastNotifiedDate', new Date().toDateString())
+  }
+
+  async function handleRequestNotification() {
+    const permission = await Notification.requestPermission()
+    setNotifPermission(permission)
+    if (permission === 'granted') triggerNotifications()
+  }
+
+  // 재방문 시 하루 한 번 자동 알림
+  useEffect(() => {
+    if (isLoading) return
+    if (typeof Notification === 'undefined') return
+    if (Notification.permission !== 'granted') return
+    if (localStorage.getItem('lastNotifiedDate') === new Date().toDateString()) return
+    triggerNotifications()
+  }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const completedCount = applicableTasks.filter((task) => progress[task.id]?.checked).length
   const progressPct = applicableTasks.length
     ? Math.round((completedCount / applicableTasks.length) * 100)
@@ -88,6 +143,15 @@ function Dashboard({ profile, progress, taskIds, loadingTaskId, isLoading, apiEr
       <header className="dashboard__topbar">
         <span className="dashboard__brand">소상공인 폐업 도우미</span>
         <div className="dashboard__topbar-actions">
+          {'Notification' in window && notifPermission !== 'denied' && (
+            <button
+              type="button"
+              className="dashboard__pill-btn dashboard__pill-btn--outline"
+              onClick={notifPermission === 'granted' ? triggerNotifications : handleRequestNotification}
+            >
+              {notifPermission === 'granted' ? '알림 확인' : '알림 받기'}
+            </button>
+          )}
           <button type="button" className="dashboard__pill-btn" onClick={onEditProfile}>
             조건 다시 입력
           </button>
