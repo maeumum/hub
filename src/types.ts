@@ -1,9 +1,10 @@
 export interface Profile {
-  industry: string       // 업종: '요식업' | '소매업' | '서비스업' | '기타'
-  isCorporation: boolean // 법인 여부 (false = 개인사업자)
-  hasEmployee: boolean   // 직원 유무 → 4대보험 상실신고 항목 포함 여부 결정
-  isRented: boolean      // 임대 여부 → 임대차 해지·점포철거비 항목 포함 여부 결정
-  closureDate: string    // 폐업 예정일 (ISO 날짜 문자열) → 각 항목 D-day 계산 기준
+  industry: string        // 업종: '요식업' | '소매업' | '서비스업' | '기타'
+  isCorporation: boolean  // 법인 여부 (false = 개인사업자)
+  hasEmployee: boolean    // 직원 유무 → 4대보험 상실신고 항목 포함 여부 결정
+  isRented: boolean       // 임대 여부 → 임대차 해지·점포철거비 항목 포함 여부 결정
+  hasOnlineSales: boolean // 온라인 판매 여부 → 통신판매업 폐지신고 항목 포함 여부 결정
+  closureDate: string     // 폐업 예정일 (ISO 날짜 문자열) → 각 항목 D-day 계산 기준
 }
 
 export type TaskGroup = 'closure' | 'tax' | 'subsidy'

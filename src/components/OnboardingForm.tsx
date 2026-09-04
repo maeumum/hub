@@ -9,7 +9,7 @@ interface OnboardingFormProps {
 
 const industries = ['요식업', '소매업', '서비스업', '기타']
 
-const stepLabels = ['업종', '사업자 유형', '직원 유무', '임대 여부', '폐업 예정일']
+const stepLabels = ['업종', '사업자 유형', '직원 유무', '임대 여부', '온라인 판매', '폐업 예정일']
 
 function OnboardingForm({ onComplete, initialProfile }: OnboardingFormProps) {
   const [step, setStep] = useState(0)
@@ -17,6 +17,7 @@ function OnboardingForm({ onComplete, initialProfile }: OnboardingFormProps) {
   const [isCorporation, setIsCorporation] = useState(initialProfile?.isCorporation ?? false)
   const [hasEmployee, setHasEmployee] = useState(initialProfile?.hasEmployee ?? false)
   const [isRented, setIsRented] = useState(initialProfile?.isRented ?? false)
+  const [hasOnlineSales, setHasOnlineSales] = useState(initialProfile?.hasOnlineSales ?? false)
   const [closureDate, setClosureDate] = useState(initialProfile?.closureDate ?? '')
   const [justNavigated, setJustNavigated] = useState(false)
 
@@ -42,7 +43,7 @@ function OnboardingForm({ onComplete, initialProfile }: OnboardingFormProps) {
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (step !== stepLabels.length - 1 || !closureDate) return
-    onComplete({ industry, isCorporation, hasEmployee, isRented, closureDate })
+    onComplete({ industry, isCorporation, hasEmployee, isRented, hasOnlineSales, closureDate })
   }
 
   return (
@@ -184,6 +185,33 @@ function OnboardingForm({ onComplete, initialProfile }: OnboardingFormProps) {
           )}
 
           {step === 4 && (
+            <div className="onboarding__step">
+              <h1>온라인으로 판매하셨나요?</h1>
+              <p className="onboarding__lead">쇼핑몰·오픈마켓·SNS 등 온라인 채널로 판매한 경우 통신판매업 폐지신고 대상이에요.</p>
+              <div className="pill-group" role="radiogroup" aria-label="온라인 판매 여부">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={hasOnlineSales}
+                  className={`pill pill--flex${hasOnlineSales ? ' pill--selected' : ''}`}
+                  onClick={() => setHasOnlineSales(true)}
+                >
+                  예
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={!hasOnlineSales}
+                  className={`pill pill--flex${!hasOnlineSales ? ' pill--selected' : ''}`}
+                  onClick={() => setHasOnlineSales(false)}
+                >
+                  아니요
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
             <div className="onboarding__step">
               <h1>폐업 예정일이 언제예요?</h1>
               <p className="onboarding__lead">각 절차의 마감일을 계산하는 기준일이에요.</p>
